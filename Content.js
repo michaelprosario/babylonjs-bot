@@ -4,8 +4,9 @@ function makeMyContent()
     let i=0;
     let j=0;
 
-    bot.positionZ = -3;
-    for(j=0; j<50; j++)
+    bot.positionY = 2;
+    bot.positionZ = -2;
+    for(j=0; j<20; j++)
     {
         for(i=0; i<=4; i++)
         {

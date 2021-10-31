@@ -119,9 +119,9 @@ function Bot()
 
 	this.drawSphereAt = function(radius,x,y,z)
 	{
-		var sX = this.positionX + radius/2;
-		var sY = this.positionY + radius/2;
-		var sZ = this.positionZ + radius/2;
+		var sX = x + radius/2;
+		var sY = y + radius/2;
+		var sZ = z + radius/2;
 	    const position = new PointData(x, y, z);
         this.drawApi.drawSphere(radius, position);
 	}
@@ -210,7 +210,6 @@ function Bot()
 		this.positionY = aPoint.y;
 		this.positionZ = aPoint.z;
 		this.setAngle(aPoint.angle);
-
 	}
 
 }
