@@ -4,13 +4,11 @@ function makeMyContent()
     let i=0;
     let j=0;
 
-    bot.positionY = 2;
-    bot.positionZ = -2;
-    for(j=0; j<20; j++)
+    for(j=0; j<400; j++)
     {
         for(i=0; i<=4; i++)
         {
-            bot.drawBox(1, 1, 1);
+            bot.drawBox(0.8, 2, 0.8);
             bot.moveUp(1);
             bot.forward(1);
         }
