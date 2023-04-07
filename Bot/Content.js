@@ -4,7 +4,7 @@ function makeMyContent()
     let i=0;
     let j=0;
 
-    for(j=0; j<400; j++)
+    for(j=0; j<40; j++)
     {
         for(i=0; i<=4; i++)
         {
