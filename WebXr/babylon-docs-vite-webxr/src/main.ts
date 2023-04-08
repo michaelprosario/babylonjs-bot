@@ -1,5 +1,4 @@
 import './style.css'
-
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera.js'
 import { Color3 } from "@babylonjs/core/Maths/math.color.js"
 import { Engine } from '@babylonjs/core/Engines/engine.js'
@@ -12,23 +11,37 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js"
 import { Vector3 } from '@babylonjs/core/Maths/math.vector.js'
 import { WebXRDefaultExperience } from '@babylonjs/core/XR/webXRDefaultExperience.js'
 
+import * as cannon from "cannon";
+window.CANNON = cannon;
+
+
 // Required for EnvironmentHelper
 import "@babylonjs/core/Materials/Textures/Loaders"
-
-// Enable GLTF/GLB loader for loading controller models from WebXR Input registry
 import '@babylonjs/loaders/glTF'
-
-// Without this next import, an error message like this occurs loading controller models:
-//  Build of NodeMaterial failed" error when loading controller model
-//  Uncaught (in promise) Build of NodeMaterial failed: input rgba from block
-//  FragmentOutput[FragmentOutputBlock] is not connected and is not optional.
 import '@babylonjs/core/Materials/Node/Blocks'
-
-// Import animatable side-effects with recent babylon v5.0.x releases for 
-// loading controllers, else:
-//  "TypeError: sceneToRenderTo.beginAnimation is not a function
-//   at WebXRMotionControllerTeleportation2._createDefaultTargetMesh (WebXRControllerTeleportation.ts:751:29)"
 import '@babylonjs/core/Animations/animatable'
+import { CannonJSPlugin, PhysicsImpostor } from '@babylonjs/core'
+
+
+function throwBall() {
+  const sphereD = 1.0
+  const sphere = MeshBuilder.CreateSphere('xSphere', { segments: 16, diameter: sphereD }, scene)
+  sphere.position.x = 0
+  sphere.position.y = sphereD * 2
+  sphere.position.z = 0
+
+  const rMat = new StandardMaterial("matR", scene)
+  rMat.diffuseColor = new Color3(1.0, 0, 0)
+  sphere.material = rMat;
+
+  sphere.physicsImpostor = new PhysicsImpostor(sphere, PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.9 }, scene);
+
+  sphere.physicsImpostor.applyImpulse(new Vector3(8, 0, 0), sphere.getAbsolutePosition());
+
+
+  setTimeout(() => { throwBall() }, 1000 * 20);
+}
+
 
 // Create a canvas element for rendering
 const app = document.querySelector<HTMLDivElement>('#app')
@@ -48,19 +61,30 @@ const envHelper = new EnvironmentHelper({
   groundColor: new Color3(0.5, 0.5, 0.5),
 }, scene)
 
+// Add physics to the scene
+var gravityVector = new Vector3(0, -9.81, 0);
+var physicsPlugin = new CannonJSPlugin();
+scene.enablePhysics(gravityVector, physicsPlugin);
+
+// Create a large flat floor mesh and add it to the scene
+var groundSize = 1000;
+var ground = MeshBuilder.CreateGround("ground", { width: groundSize, height: groundSize }, scene);
+var material = new StandardMaterial("material", scene);
+material.diffuseColor = new Color3(0, 1, 0); // Green color
+ground.material = material;
+
+// Add physics to the ground
+ground.physicsImpostor = new PhysicsImpostor(ground, PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
+
 // Add a camera for the non-VR view in browser
 const camera = new ArcRotateCamera("Camera", -(Math.PI / 4) * 3, Math.PI / 4, 10, new Vector3(0, 0, 0), scene);
 camera.attachControl(true)
 
-// Add a sphere to have something to look at
-const sphereD = 1.0
-const sphere = MeshBuilder.CreateSphere('xSphere', { segments: 16, diameter: sphereD }, scene)
-sphere.position.x = 0
-sphere.position.y = sphereD * 2
-sphere.position.z = 0
-const rMat = new StandardMaterial("matR", scene)
-rMat.diffuseColor = new Color3(1.0, 0, 0)
-sphere.material = rMat
+
+throwBall();
+
+
+
 
 // Setup default WebXR experience
 // Use the enviroment floor to enable teleportation
@@ -74,18 +98,18 @@ babylonEngine.runRenderLoop(() => {
   scene.render()
 })
 
-// Uncomment to use Babylon Debug/Inspector.
-// Will also need to install: `npm i @babylonjs/inspector@X.Y.Z -D`
-//-----
-// void Promise.all([
-//   import('@babylonjs/core/Legacy/legacy'),
-//   import('@babylonjs/core/Debug/debugLayer'),
-//   import('@babylonjs/inspector'),
-// ]).then(() =>
-//     scene.debugLayer.show({
-//       handleResize: true,
-//       embedMode: true,
-//       overlay: true,
-//     }),
-// )
-//-----
+/*
+void Promise.all([
+  import('@babylonjs/core/Legacy/legacy'),
+  import('@babylonjs/core/Debug/debugLayer'),
+  import('@babylonjs/inspector'),
+]).then(() =>
+    scene.debugLayer.show({
+      handleResize: true,
+      embedMode: true,
+      overlay: true,
+    }),
+)
+*/
+
+
